@@ -21,7 +21,15 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, FolderOpen, RefreshCw, Container, CheckCircle, XCircle, Clock } from "lucide-react";
+import {
+  AlertCircle,
+  FolderOpen,
+  RefreshCw,
+  Container,
+  CheckCircle,
+  XCircle,
+  Clock,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -49,7 +57,7 @@ export default function NamespacesPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:4000/api/namespaces");
+      const response = await fetch("http://localhost:4600/api/namespaces");
       if (!response.ok) {
         throw new Error("Failed to fetch namespaces");
       }
@@ -66,7 +74,9 @@ export default function NamespacesPage() {
     setPodsLoading(true);
     setPodsError(null);
     try {
-      const response = await fetch(`http://localhost:4000/api/pods?namespace=${namespace}`);
+      const response = await fetch(
+        `http://localhost:4600/api/pods?namespace=${namespace}`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch pods");
       }
@@ -101,7 +111,9 @@ export default function NamespacesPage() {
     const created = new Date(timestamp);
     const diffMs = now - created;
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const diffHours = Math.floor(
+      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
 
     if (diffDays > 0) {
       return `${diffDays}d`;
@@ -113,13 +125,13 @@ export default function NamespacesPage() {
   const getPodStatusBadge = (pod) => {
     const phase = pod.status?.phase;
     const ready = pod.status?.ready;
-    
+
     // If pod is not ready, check for container reasons
     if (ready === false) {
-      const containerWithReason = pod.containers?.find(container => 
-        container.state?.waiting?.reason
+      const containerWithReason = pod.containers?.find(
+        (container) => container.state?.waiting?.reason
       );
-      
+
       if (containerWithReason) {
         const reason = containerWithReason.state.waiting.reason;
         return (
@@ -170,9 +182,12 @@ export default function NamespacesPage() {
     const readyContainers = pod.containers?.filter((c) => c.ready).length || 0;
     const totalContainers = pod.containers?.length || 0;
     const isReady = readyContainers === totalContainers && totalContainers > 0;
-    
+
     return (
-      <Badge variant={isReady ? "default" : "destructive"} className={isReady ? "bg-green-500" : ""}>
+      <Badge
+        variant={isReady ? "default" : "destructive"}
+        className={isReady ? "bg-green-500" : ""}
+      >
         {readyContainers}/{totalContainers}
       </Badge>
     );
@@ -204,7 +219,9 @@ export default function NamespacesPage() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>Failed to load namespaces: {error}</AlertDescription>
+          <AlertDescription>
+            Failed to load namespaces: {error}
+          </AlertDescription>
         </Alert>
       </div>
     );
@@ -253,27 +270,39 @@ export default function NamespacesPage() {
                     <TableCell>{getStatusBadge(namespace.status)}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {namespace.labels && Object.keys(namespace.labels).length > 0 ? (
-                          Object.entries(namespace.labels).slice(0, 2).map(([key, value]) => (
-                            <Badge key={key} variant="outline" className="text-xs">
-                              {key}: {value}
-                            </Badge>
-                          ))
+                        {namespace.labels &&
+                        Object.keys(namespace.labels).length > 0 ? (
+                          Object.entries(namespace.labels)
+                            .slice(0, 2)
+                            .map(([key, value]) => (
+                              <Badge
+                                key={key}
+                                variant="outline"
+                                className="text-xs"
+                              >
+                                {key}: {value}
+                              </Badge>
+                            ))
                         ) : (
-                          <span className="text-muted-foreground text-sm">No labels</span>
+                          <span className="text-muted-foreground text-sm">
+                            No labels
+                          </span>
                         )}
-                        {namespace.labels && Object.keys(namespace.labels).length > 2 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{Object.keys(namespace.labels).length - 2} more
-                          </Badge>
-                        )}
+                        {namespace.labels &&
+                          Object.keys(namespace.labels).length > 2 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{Object.keys(namespace.labels).length - 2} more
+                            </Badge>
+                          )}
                       </div>
                     </TableCell>
-                    <TableCell>{formatAge(namespace.creationTimestamp)}</TableCell>
+                    <TableCell>
+                      {formatAge(namespace.creationTimestamp)}
+                    </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => handleViewPods(namespace.name)}
                         >
@@ -282,11 +311,14 @@ export default function NamespacesPage() {
                         <Button variant="outline" size="sm">
                           Edit
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           className="text-red-600"
-                          disabled={namespace.name === "default" || namespace.name === "kube-system"}
+                          disabled={
+                            namespace.name === "default" ||
+                            namespace.name === "kube-system"
+                          }
                         >
                           Delete
                         </Button>
@@ -309,7 +341,7 @@ export default function NamespacesPage() {
               View all pods running in the {selectedNamespace} namespace
             </DialogDescription>
           </DialogHeader>
-          
+
           {podsLoading ? (
             <div className="space-y-2">
               <Skeleton className="h-4 w-full" />
@@ -320,13 +352,16 @@ export default function NamespacesPage() {
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
-              <AlertDescription>Failed to load pods: {podsError}</AlertDescription>
+              <AlertDescription>
+                Failed to load pods: {podsError}
+              </AlertDescription>
             </Alert>
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableCaption>
-                  {namespacePods.length} pods found in {selectedNamespace} namespace
+                  {namespacePods.length} pods found in {selectedNamespace}{" "}
+                  namespace
                 </TableCaption>
                 <TableHeader>
                   <TableRow>

@@ -30,9 +30,24 @@ const menuItems = [
     description: "Manage Kubernetes namespaces"
   },
   {
+    title: "Deployments",
+    href: "/deployments",
+    description: "Monitor and manage deployments"
+  },
+  {
     title: "Pods",
     href: "/pods",
     description: "Monitor running pods and workloads"
+  },
+  {
+    title: "Network",
+    href: "/network",
+    description: "Manage services and ingresses"
+  },
+  {
+    title: "Playground",
+    href: "/playground",
+    description: "Test pod creation and monitor status flow"
   }
 ];
 

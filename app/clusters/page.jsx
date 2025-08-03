@@ -21,7 +21,15 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Server, Cpu, MemoryStick, Container, Activity, RefreshCw } from "lucide-react";
+import {
+  AlertCircle,
+  Server,
+  Cpu,
+  MemoryStick,
+  Container,
+  Activity,
+  RefreshCw,
+} from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 export default function ClustersPage() {
@@ -39,8 +47,8 @@ export default function ClustersPage() {
   const fetchData = async () => {
     try {
       const [clustersResponse, healthResponse] = await Promise.all([
-        fetch("http://localhost:4000/api/clusters"),
-        fetch("http://localhost:4000/api/health")
+        fetch("http://localhost:4600/api/clusters"),
+        fetch("http://localhost:4600/api/health"),
       ]);
 
       if (!clustersResponse.ok) {
@@ -70,7 +78,9 @@ export default function ClustersPage() {
   const fetchClusterDetail = async (clusterName) => {
     setDetailLoading(true);
     try {
-      const response = await fetch(`http://localhost:4000/api/clusters/${clusterName}`);
+      const response = await fetch(
+        `http://localhost:4600/api/clusters/${clusterName}`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch cluster details");
       }
@@ -91,7 +101,10 @@ export default function ClustersPage() {
     // Check if this cluster is the current connected one
     if (cluster.isCurrent && health.kubernetes.connected) {
       return "Connected";
-    } else if (cluster.context === health.kubernetes.context && health.kubernetes.connected) {
+    } else if (
+      cluster.context === health.kubernetes.context &&
+      health.kubernetes.connected
+    ) {
       return "Connected";
     } else {
       return "Disconnected";
@@ -100,7 +113,7 @@ export default function ClustersPage() {
 
   const getStatusBadge = (cluster) => {
     const status = getClusterStatus(cluster);
-    
+
     switch (status.toLowerCase()) {
       case "connected":
         return <Badge className="bg-green-500">Connected</Badge>;
@@ -116,7 +129,11 @@ export default function ClustersPage() {
       return versionObj;
     }
     if (typeof versionObj === "object" && versionObj) {
-      return versionObj.gitVersion || versionObj.major + "." + versionObj.minor || "-";
+      return (
+        versionObj.gitVersion ||
+        versionObj.major + "." + versionObj.minor ||
+        "-"
+      );
     }
     return "-";
   };
@@ -172,8 +189,12 @@ export default function ClustersPage() {
     const { usage, capacity } = clusterDetail.metrics;
     const { stats } = clusterDetail;
 
-    const cpuUsagePercent = Math.round((usage.cpu.millicores / capacity.cpu.millicores) * 100);
-    const memoryUsagePercent = Math.round((usage.memory.bytes / capacity.memory.bytes) * 100);
+    const cpuUsagePercent = Math.round(
+      (usage.cpu.millicores / capacity.cpu.millicores) * 100
+    );
+    const memoryUsagePercent = Math.round(
+      (usage.memory.bytes / capacity.memory.bytes) * 100
+    );
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
@@ -182,7 +203,9 @@ export default function ClustersPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">CPU Usage</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  CPU Usage
+                </p>
                 <p className="text-2xl font-bold">{cpuUsagePercent}%</p>
                 <p className="text-xs text-muted-foreground">
                   {usage.cpu.cores.toFixed(2)} / {capacity.cpu.cores} cores
@@ -199,10 +222,13 @@ export default function ClustersPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Memory Usage</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Memory Usage
+                </p>
                 <p className="text-2xl font-bold">{memoryUsagePercent}%</p>
                 <p className="text-xs text-muted-foreground">
-                  {usage.memory.gigabytes.toFixed(1)} / {capacity.memory.gigabytes.toFixed(1)} GB
+                  {usage.memory.gigabytes.toFixed(1)} /{" "}
+                  {capacity.memory.gigabytes.toFixed(1)} GB
                 </p>
               </div>
               <MemoryStick className="h-8 w-8 text-green-500" />
@@ -216,7 +242,9 @@ export default function ClustersPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Pods</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Pods
+                </p>
                 <p className="text-2xl font-bold">{stats.totalPods}</p>
                 <p className="text-xs text-muted-foreground">
                   {stats.runningPods} running, {stats.pendingPods} pending
@@ -238,7 +266,9 @@ export default function ClustersPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Nodes</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Nodes
+                </p>
                 <p className="text-2xl font-bold">{stats.totalNodes}</p>
                 <p className="text-xs text-muted-foreground">
                   {stats.readyNodes} ready
@@ -247,7 +277,10 @@ export default function ClustersPage() {
               <Activity className="h-8 w-8 text-orange-500" />
             </div>
             <div className="mt-3">
-              <Progress value={(stats.readyNodes / stats.totalNodes) * 100} className="h-2" />
+              <Progress
+                value={(stats.readyNodes / stats.totalNodes) * 100}
+                className="h-2"
+              />
             </div>
           </CardContent>
         </Card>
@@ -274,9 +307,7 @@ export default function ClustersPage() {
         <CardContent>
           <div className="overflow-x-auto">
             <Table>
-              <TableCaption>
-                {clusters.length} clusters found
-              </TableCaption>
+              <TableCaption>{clusters.length} clusters found</TableCaption>
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
@@ -297,7 +328,9 @@ export default function ClustersPage() {
                     <TableCell>{cluster.origin || "-"}</TableCell>
                     <TableCell>{getStatusBadge(cluster)}</TableCell>
                     <TableCell className="font-mono text-sm">
-                      {getKubernetesVersion(cluster.kubernetesVersion || cluster.version)}
+                      {getKubernetesVersion(
+                        cluster.kubernetesVersion || cluster.version
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -312,7 +345,7 @@ export default function ClustersPage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>
-              Cluster Details - {clusters[0]?.name || 'Loading...'}
+              Cluster Details - {clusters[0]?.name || "Loading..."}
             </CardTitle>
             <CardDescription>
               Resource usage and statistics for the selected cluster

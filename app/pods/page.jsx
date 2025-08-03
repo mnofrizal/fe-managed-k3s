@@ -30,6 +30,8 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  Terminal,
+  FileText,
 } from "lucide-react";
 import {
   Select,
@@ -47,6 +49,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import PodTerminalDialog from "@/components/PodTerminalDialog";
+import PodLogsDialog from "@/components/PodLogsDialog";
 
 export default function PodsPage() {
   const [pods, setPods] = useState([]);
@@ -54,8 +58,8 @@ export default function PodsPage() {
   const [error, setError] = useState(null);
   const [namespaceFilter, setNamespaceFilter] = useState("all");
   const [hideKubeSystem, setHideKubeSystem] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('hideKubeSystem');
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("hideKubeSystem");
       return saved ? JSON.parse(saved) : false;
     }
     return false;
@@ -65,14 +69,16 @@ export default function PodsPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState(null);
+  const [terminalDialogOpen, setTerminalDialogOpen] = useState(false);
+  const [logsDialogOpen, setLogsDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchPods();
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('hideKubeSystem', JSON.stringify(hideKubeSystem));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("hideKubeSystem", JSON.stringify(hideKubeSystem));
     }
   }, [hideKubeSystem]);
 
@@ -80,7 +86,7 @@ export default function PodsPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:4000/api/pods");
+      const response = await fetch("http://localhost:4600/api/pods");
       if (!response.ok) {
         throw new Error("Failed to fetch pods");
       }
@@ -211,7 +217,7 @@ export default function PodsPage() {
     setDetailError(null);
     try {
       const response = await fetch(
-        `http://localhost:4000/api/pods/${podName}?namespace=${namespace}`
+        `http://localhost:4600/api/pods/${podName}?namespace=${namespace}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch pod details");
@@ -426,25 +432,57 @@ export default function PodsPage() {
           side="right"
         >
           <SheetHeader className="pb-4">
-            <SheetTitle className="text-xl">Pod Details</SheetTitle>
-            <SheetDescription asChild>
-              <div className="text-base">
-                {selectedPod ? (
-                  <div className="space-y-1">
-                    <div className="font-mono text-sm break-all">
-                      {selectedPod.name}
-                    </div>
-                    <div>
-                      in{" "}
-                      <Badge variant="outline">{selectedPod.namespace}</Badge>{" "}
-                      namespace
-                    </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <SheetTitle className="text-xl">Pod Details</SheetTitle>
+                <SheetDescription asChild>
+                  <div className="text-base">
+                    {selectedPod ? (
+                      <div className="space-y-1">
+                        <div className="font-mono text-sm break-all">
+                          {selectedPod.name}
+                        </div>
+                        <div>
+                          in{" "}
+                          <Badge variant="outline">{selectedPod.namespace}</Badge>{" "}
+                          namespace
+                        </div>
+                      </div>
+                    ) : (
+                      "Loading..."
+                    )}
                   </div>
-                ) : (
-                  "Loading..."
-                )}
+                </SheetDescription>
               </div>
-            </SheetDescription>
+              {selectedPod && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSheetOpen(false);
+                      setLogsDialogOpen(true);
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Logs
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSheetOpen(false);
+                      setTerminalDialogOpen(true);
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <Terminal className="h-4 w-4" />
+                    Terminal
+                  </Button>
+                </div>
+              )}
+            </div>
           </SheetHeader>
 
           {detailLoading ? (
@@ -932,6 +970,20 @@ export default function PodsPage() {
           ) : null}
         </SheetContent>
       </Sheet>
+
+      {/* Terminal Dialog */}
+      <PodTerminalDialog
+        isOpen={terminalDialogOpen}
+        onClose={() => setTerminalDialogOpen(false)}
+        pod={selectedPod}
+      />
+
+      {/* Logs Dialog */}
+      <PodLogsDialog
+        isOpen={logsDialogOpen}
+        onClose={() => setLogsDialogOpen(false)}
+        pod={selectedPod}
+      />
     </div>
   );
 }

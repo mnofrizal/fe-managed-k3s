@@ -43,7 +43,7 @@ export default function NodesPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:4000/api/nodes");
+      const response = await fetch("http://localhost:4600/api/nodes");
       if (!response.ok) {
         throw new Error("Failed to fetch nodes");
       }
@@ -284,13 +284,19 @@ export default function NodesPage() {
                             <TooltipTrigger asChild>
                               <div className="space-y-1">
                                 <div className="text-sm">
-                                  {node.pods?.total || 0}/{node.capacity?.pods || 110}
+                                  {node.pods?.total || 0}/
+                                  {node.capacity?.pods || 110}
                                 </div>
                                 <div className="text-xs text-muted-foreground">
-                                  {node.pods?.running || 0} running, {node.pods?.pending || 0} pending
+                                  {node.pods?.running || 0} running,{" "}
+                                  {node.pods?.pending || 0} pending
                                 </div>
                                 <Progress
-                                  value={((node.pods?.total || 0) / (node.capacity?.pods || 110)) * 100}
+                                  value={
+                                    ((node.pods?.total || 0) /
+                                      (node.capacity?.pods || 110)) *
+                                    100
+                                  }
                                   className="h-1"
                                 />
                               </div>
@@ -300,8 +306,13 @@ export default function NodesPage() {
                                 <div>Running: {node.pods?.running || 0}</div>
                                 <div>Pending: {node.pods?.pending || 0}</div>
                                 <div>Failed: {node.pods?.failed || 0}</div>
-                                <div>Succeeded: {node.pods?.succeeded || 0}</div>
-                                <div>Total: {node.pods?.total || 0} of {node.capacity?.pods || 110}</div>
+                                <div>
+                                  Succeeded: {node.pods?.succeeded || 0}
+                                </div>
+                                <div>
+                                  Total: {node.pods?.total || 0} of{" "}
+                                  {node.capacity?.pods || 110}
+                                </div>
                               </div>
                             </TooltipContent>
                           </Tooltip>

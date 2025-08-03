@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,16 +50,19 @@ export default function NetworkPage() {
     setServicesLoading(true);
     setServicesError(null);
     try {
-      const response = await fetch("http://localhost:4600/api/services", {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/services`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Failed to fetch services");
       }
-      
+
       const result = await response.json();
       setServices(result.success ? result.data : []);
     } catch (err) {
@@ -73,16 +76,19 @@ export default function NetworkPage() {
     setIngressesLoading(true);
     setIngressesError(null);
     try {
-      const response = await fetch("http://localhost:4600/api/ingresses", {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/ingresses`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Failed to fetch ingresses");
       }
-      
+
       const result = await response.json();
       setIngresses(result.success ? result.data : []);
     } catch (err) {
@@ -108,37 +114,35 @@ export default function NetworkPage() {
       LoadBalancer: "bg-purple-500",
       ExternalName: "bg-orange-500",
     };
-    return (
-      <Badge className={`${colorMap[type]} text-white`}>
-        {type}
-      </Badge>
-    );
+    return <Badge className={`${colorMap[type]} text-white`}>{type}</Badge>;
   };
 
   const getServicePorts = (service) => {
     const ports = service.spec?.ports || [];
     if (ports.length === 0) return "None";
-    
-    return ports.map(port => {
-      const targetPort = port.targetPort || port.port;
-      return `${port.port}:${targetPort}/${port.protocol}`;
-    }).join(", ");
+
+    return ports
+      .map((port) => {
+        const targetPort = port.targetPort || port.port;
+        return `${port.port}:${targetPort}/${port.protocol}`;
+      })
+      .join(", ");
   };
 
   const getIngressHosts = (ingress) => {
     const rules = ingress.spec?.rules || [];
     if (rules.length === 0) return "*";
-    
-    return rules.map(rule => rule.host || "*").join(", ");
+
+    return rules.map((rule) => rule.host || "*").join(", ");
   };
 
   const getIngressBackendServices = (ingress) => {
     const rules = ingress.spec?.rules || [];
     let services = [];
-    
-    rules.forEach(rule => {
+
+    rules.forEach((rule) => {
       const httpPaths = rule.http?.paths || [];
-      httpPaths.forEach(path => {
+      httpPaths.forEach((path) => {
         const backend = path.backend?.service;
         if (backend) {
           const serviceName = backend.name;
@@ -147,7 +151,7 @@ export default function NetworkPage() {
         }
       });
     });
-    
+
     // Remove duplicates and return
     const uniqueServices = [...new Set(services)];
     return uniqueServices.length > 0 ? uniqueServices.join(", ") : "None";
@@ -156,15 +160,19 @@ export default function NetworkPage() {
   const getIngressAddresses = (ingress) => {
     const ingressList = ingress.status?.loadBalancer?.ingress || [];
     if (ingressList.length === 0) return "Pending";
-    
-    const addresses = ingressList.map(ing => ing.ip || ing.hostname).filter(Boolean);
+
+    const addresses = ingressList
+      .map((ing) => ing.ip || ing.hostname)
+      .filter(Boolean);
     return addresses.length > 0 ? addresses.join(", ") : "Pending";
   };
 
   const getIngressClass = (ingress) => {
-    return ingress.spec?.ingressClassName || 
-           ingress.metadata?.annotations?.["kubernetes.io/ingress.class"] || 
-           "default";
+    return (
+      ingress.spec?.ingressClassName ||
+      ingress.metadata?.annotations?.["kubernetes.io/ingress.class"] ||
+      "default"
+    );
   };
 
   const hasTLS = (ingress) => {
@@ -173,12 +181,14 @@ export default function NetworkPage() {
 
   const formatAge = (timestamp) => {
     if (!timestamp) return "Unknown";
-    
+
     const now = new Date();
     const created = new Date(timestamp);
     const diffMs = now - created;
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const diffHours = Math.floor(
+      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
     const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
     if (diffDays > 0) return `${diffDays}d`;
@@ -237,7 +247,7 @@ export default function NetworkPage() {
                   <AlertDescription>{servicesError}</AlertDescription>
                 </Alert>
               )}
-              
+
               {servicesLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <RefreshCw className="h-6 w-6 animate-spin mr-2" />
@@ -259,13 +269,18 @@ export default function NetworkPage() {
                   <TableBody>
                     {services.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                        <TableCell
+                          colSpan={7}
+                          className="text-center py-8 text-muted-foreground"
+                        >
                           No services found
                         </TableCell>
                       </TableRow>
                     ) : (
                       services.map((service) => (
-                        <TableRow key={`${service.metadata?.namespace}/${service.metadata?.name}`}>
+                        <TableRow
+                          key={`${service.metadata?.namespace}/${service.metadata?.name}`}
+                        >
                           <TableCell className="font-medium">
                             {service.metadata?.name}
                           </TableCell>
@@ -274,16 +289,16 @@ export default function NetworkPage() {
                               {service.metadata?.namespace}
                             </Badge>
                           </TableCell>
-                          <TableCell>
-                            {getServiceType(service)}
-                          </TableCell>
+                          <TableCell>{getServiceType(service)}</TableCell>
                           <TableCell className="font-mono text-sm">
                             {service.spec?.clusterIP || "None"}
                           </TableCell>
                           <TableCell className="font-mono text-sm">
-                            {service.status?.loadBalancer?.ingress?.[0]?.ip || 
-                             service.spec?.externalIPs?.join(", ") || 
-                             (service.spec?.type === "NodePort" ? "nodes" : "None")}
+                            {service.status?.loadBalancer?.ingress?.[0]?.ip ||
+                              service.spec?.externalIPs?.join(", ") ||
+                              (service.spec?.type === "NodePort"
+                                ? "nodes"
+                                : "None")}
                           </TableCell>
                           <TableCell className="font-mono text-sm">
                             {getServicePorts(service)}
@@ -323,7 +338,7 @@ export default function NetworkPage() {
                   <AlertDescription>{ingressesError}</AlertDescription>
                 </Alert>
               )}
-              
+
               {ingressesLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <RefreshCw className="h-6 w-6 animate-spin mr-2" />
@@ -346,13 +361,18 @@ export default function NetworkPage() {
                   <TableBody>
                     {ingresses.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                        <TableCell
+                          colSpan={8}
+                          className="text-center py-8 text-muted-foreground"
+                        >
                           No ingresses found
                         </TableCell>
                       </TableRow>
                     ) : (
                       ingresses.map((ingress) => (
-                        <TableRow key={`${ingress.metadata?.namespace}/${ingress.metadata?.name}`}>
+                        <TableRow
+                          key={`${ingress.metadata?.namespace}/${ingress.metadata?.name}`}
+                        >
                           <TableCell className="font-medium">
                             {ingress.metadata?.name}
                           </TableCell>
@@ -382,9 +402,7 @@ export default function NetworkPage() {
                                 TLS
                               </Badge>
                             ) : (
-                              <Badge variant="outline">
-                                No TLS
-                              </Badge>
+                              <Badge variant="outline">No TLS</Badge>
                             )}
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">

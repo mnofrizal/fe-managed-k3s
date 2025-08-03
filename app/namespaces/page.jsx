@@ -57,7 +57,9 @@ export default function NamespacesPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:4600/api/namespaces");
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/namespaces`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch namespaces");
       }
@@ -75,7 +77,7 @@ export default function NamespacesPage() {
     setPodsError(null);
     try {
       const response = await fetch(
-        `http://localhost:4600/api/pods?namespace=${namespace}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/pods?namespace=${namespace}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch pods");

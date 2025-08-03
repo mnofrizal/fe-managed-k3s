@@ -86,7 +86,9 @@ export default function PodsPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:4600/api/pods");
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/pods`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch pods");
       }
@@ -217,7 +219,7 @@ export default function PodsPage() {
     setDetailError(null);
     try {
       const response = await fetch(
-        `http://localhost:4600/api/pods/${podName}?namespace=${namespace}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/pods/${podName}?namespace=${namespace}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch pod details");
@@ -444,7 +446,9 @@ export default function PodsPage() {
                         </div>
                         <div>
                           in{" "}
-                          <Badge variant="outline">{selectedPod.namespace}</Badge>{" "}
+                          <Badge variant="outline">
+                            {selectedPod.namespace}
+                          </Badge>{" "}
                           namespace
                         </div>
                       </div>

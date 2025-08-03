@@ -99,11 +99,14 @@ export default function DeploymentsPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:4600/api/deployments", {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/deployments`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch deployments");
       }
@@ -121,7 +124,7 @@ export default function DeploymentsPage() {
     setDetailError(null);
     try {
       const response = await fetch(
-        `http://localhost:4600/api/deployments/${deploymentName}?namespace=${namespace}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/deployments/${deploymentName}?namespace=${namespace}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -145,7 +148,7 @@ export default function DeploymentsPage() {
     setPodsError(null);
     try {
       const response = await fetch(
-        `http://localhost:4600/api/deployments/${deploymentName}/pods?namespace=${namespace}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/deployments/${deploymentName}/pods?namespace=${namespace}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -329,7 +332,7 @@ export default function DeploymentsPage() {
     setIsRestarting(true);
     try {
       const response = await fetch(
-        `http://localhost:4600/api/deployments/${deploymentName}/restart?namespace=${namespace}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/deployments/${deploymentName}/restart?namespace=${namespace}`,
         {
           method: "POST",
           headers: {
@@ -337,15 +340,15 @@ export default function DeploymentsPage() {
           },
         }
       );
-      
+
       if (!response.ok) {
         throw new Error("Failed to restart deployment");
       }
-      
+
       // Refresh deployment details and pods after restart
       fetchDeploymentDetail(deploymentName, namespace);
       fetchDeploymentPods(deploymentName, namespace);
-      
+
       // Optional: Show success feedback
       // You could add a toast notification here
     } catch (err) {
@@ -413,7 +416,8 @@ export default function DeploymentsPage() {
   };
 
   const getPodReadyBadge = (pod) => {
-    const readyContainers = pod.status?.containerStatuses?.filter((c) => c.ready).length || 0;
+    const readyContainers =
+      pod.status?.containerStatuses?.filter((c) => c.ready).length || 0;
     const totalContainers = pod.status?.containerStatuses?.length || 0;
     const isReady = readyContainers === totalContainers && totalContainers > 0;
 
@@ -765,15 +769,21 @@ export default function DeploymentsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => restartDeployment(
-                      selectedDeployment.metadata?.name,
-                      selectedDeployment.metadata?.namespace
-                    )}
+                    onClick={() =>
+                      restartDeployment(
+                        selectedDeployment.metadata?.name,
+                        selectedDeployment.metadata?.namespace
+                      )
+                    }
                     disabled={isRestarting}
                     className="flex items-center gap-2"
                   >
-                    <RotateCcw className={`h-4 w-4 ${isRestarting ? 'animate-spin' : ''}`} />
-                    {isRestarting ? 'Restarting...' : 'Restart'}
+                    <RotateCcw
+                      className={`h-4 w-4 ${
+                        isRestarting ? "animate-spin" : ""
+                      }`}
+                    />
+                    {isRestarting ? "Restarting..." : "Restart"}
                   </Button>
                 </div>
               )}
@@ -971,13 +981,17 @@ export default function DeploymentsPage() {
                                 <TableCell className="font-medium">
                                   <div className="flex items-center space-x-2">
                                     <Container className="h-4 w-4" />
-                                    <span className="font-mono text-sm">{pod.metadata?.name}</span>
+                                    <span className="font-mono text-sm">
+                                      {pod.metadata?.name}
+                                    </span>
                                   </div>
                                 </TableCell>
                                 <TableCell>
                                   <span
                                     className={
-                                      restarts > 0 ? "text-yellow-600 font-medium" : ""
+                                      restarts > 0
+                                        ? "text-yellow-600 font-medium"
+                                        : ""
                                     }
                                   >
                                     {restarts}
@@ -1006,8 +1020,12 @@ export default function DeploymentsPage() {
                                     {pod.status?.podIP || "-"}
                                   </span>
                                 </TableCell>
-                                <TableCell>{pod.spec?.nodeName || "-"}</TableCell>
-                                <TableCell>{formatAge(pod.metadata?.creationTimestamp)}</TableCell>
+                                <TableCell>
+                                  {pod.spec?.nodeName || "-"}
+                                </TableCell>
+                                <TableCell>
+                                  {formatAge(pod.metadata?.creationTimestamp)}
+                                </TableCell>
                               </TableRow>
                             );
                           })}

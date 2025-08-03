@@ -60,7 +60,7 @@ export default function PlaygroundPage() {
       envVars: [
         { name: "N8N_HOST", value: "0.0.0.0" },
         { name: "N8N_PORT", value: "5678" },
-        { name: "N8N_PROTOCOL", value: "http" }
+        { name: "N8N_PROTOCOL", value: "http" },
       ],
       pvcEnabled: true,
       pvcName: "n8n-data",
@@ -88,7 +88,7 @@ export default function PlaygroundPage() {
       ports: [{ containerPort: 3000, protocol: "TCP" }],
       envVars: [
         { name: "WAHA_PRINT_QR", value: "true" },
-        { name: "WAHA_LOG_LEVEL", value: "info" }
+        { name: "WAHA_LOG_LEVEL", value: "info" },
       ],
       pvcEnabled: true,
       pvcName: "waha-sessions",
@@ -256,7 +256,11 @@ export default function PlaygroundPage() {
       }
 
       // Add ingress spec if enabled
-      if (deploymentConfig.ingressEnabled && deploymentConfig.ingressName && deploymentConfig.serviceEnabled) {
+      if (
+        deploymentConfig.ingressEnabled &&
+        deploymentConfig.ingressName &&
+        deploymentConfig.serviceEnabled
+      ) {
         payload.ingress = {
           apiVersion: "networking.k8s.io/v1",
           kind: "Ingress",
@@ -291,13 +295,16 @@ export default function PlaygroundPage() {
       }
 
       // Call unified deployment creation API
-      const response = await fetch(`http://localhost:4600/api/deployments?namespace=${deploymentConfig.namespace}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/deployments?namespace=${deploymentConfig.namespace}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to create deployment");
@@ -348,7 +355,8 @@ export default function PlaygroundPage() {
     setCreatedDeployments((prev) =>
       prev.map((deployment) => {
         const age =
-          Date.now() - new Date(deployment.metadata.creationTimestamp).getTime();
+          Date.now() -
+          new Date(deployment.metadata.creationTimestamp).getTime();
         const ageMinutes = age / (1000 * 60);
 
         let newStatus = { ...deployment.status };
@@ -366,7 +374,9 @@ export default function PlaygroundPage() {
           ];
         } else if (ageMinutes < 1) {
           newStatus.readyReplicas = Math.floor(deployment.spec.replicas / 2);
-          newStatus.availableReplicas = Math.floor(deployment.spec.replicas / 2);
+          newStatus.availableReplicas = Math.floor(
+            deployment.spec.replicas / 2
+          );
           newStatus.conditions = [
             {
               type: "Progressing",
@@ -400,7 +410,7 @@ export default function PlaygroundPage() {
     try {
       // In real implementation, call delete API
       const response = await fetch(
-        `http://localhost:4600/api/deployments/${deploymentName}?namespace=${namespace}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/deployments/${deploymentName}?namespace=${namespace}`,
         {
           method: "DELETE",
         }

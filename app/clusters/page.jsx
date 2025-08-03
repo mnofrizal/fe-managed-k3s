@@ -47,8 +47,8 @@ export default function ClustersPage() {
   const fetchData = async () => {
     try {
       const [clustersResponse, healthResponse] = await Promise.all([
-        fetch("http://localhost:4600/api/clusters"),
-        fetch("http://localhost:4600/api/health"),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/clusters`),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/health`),
       ]);
 
       if (!clustersResponse.ok) {
@@ -79,7 +79,7 @@ export default function ClustersPage() {
     setDetailLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:4600/api/clusters/${clusterName}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/clusters/${clusterName}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch cluster details");
